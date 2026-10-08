@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChatApp + SmartChat AI</title>
+<style>
+:root{--navy:#0b2a5b;--blue:#1a73e8;--green:#16a34a;--purple:#7c3aed;--orange:#f59e0b;--pink:#ec4899;--red:#dc2626;--bg:#e9f0fb;--ink:#12213f;--mut:#64748b;--line:#e2e8f0}
+.btn{background:var(--blue);color:#fff;padding:8px 14px;border-radius:10px;font-weight:600}
+.btn.g{background:var(--green)}.btn.o{background:#eef2f7;color:var(--ink)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.tile{border-radius:14px;padding:9px 6px;text-align:center;color:#fff}
+.tile b{display:block;font-size:22px;line-height:1.1}.tile small{font-size:11px;opacity:.9}
+.qa{display:flex;gap:6px;margin-bottom:10px}.qa input{flex:1;min-width:0;padding:9px 12px;border:1px solid var(--line);border-radius:10px}
+.fl{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.fl button{padding:4px 12px;border-radius:99px;background:#eef2f7;font-size:12px;font-weight:600}.fl button.on{background:var(--navy);color:#fff}
+.tk{border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:14px;padding:10px 12px;margin-bottom:10px;background:#fff}
+.tk.High{border-left-color:var(--red)}.tk.Medium{border-left-color:var(--orange)}.tk.done{opacity:.65;border-left-color:var(--green)}
+.tk h4{font-size:14.5px}.tk .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0}
+.pill{font-size:11px;font-weight:600;border-radius:99px;padding:2px 9px;background:#e8f1fe;color:var(--blue)}
+.pill.High{background:#fee2e2;color:var(--red)}.pill.Medium{background:#fef3c7;color:#b45309}.pill.pending{background:#fff4d6;color:#b45309}
+.pill.done{background:#dcfce7;color:#15803d}.pill.overdue{background:#fee2e2;color:var(--red)}
+.tk q{display:block;font-size:12.5px;color:var(--mut);border-left:3px solid var(--line);padding-left:8px;margin:6px 0;quotes:none}
+.tk .meta{font-size:12.5px;color:#334155}.tk .acts{display:flex;gap:6px;margin-top:8px}
+.tk .acts button{padding:5px 11px;border-radius:8px;font-size:12px;font-weight:600;background:#eef2f7}
+.tk .acts .f{background:var(--green);color:#fff}
+.hist{font-size:11.5px;color:#b45309;margin-top:4px}
+.cf-card{border:1.5px dashed var(--pink);background:#fff5fa;border-radius:14px;padding:10px 12px;margin-bottom:10px}
+.cf-card input{padding:6px;border:1px solid var(--line);border-radius:8px;margin:6px 0;width:100%}
+.h3{font-size:12.5px;font-weight:700;margin:6px 0;color:var(--navy)}
+.lg{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:12.5px}.lg small{color:var(--mut);display:block}
+.empty{text-align:center;color:var(--mut);padding:26px 10px}
+.nt{background:#fff;border-radius:16px;box-shadow:0 14px 40px #0b2a5b45;border-top:5px solid var(--orange);padding:12px 14px;animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+.nt.overdue{border-top-color:var(--red)}.nt.change{border-top-color:var(--purple)}
+.nt .hd{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:6px}.nt .hd i{width:28px;height:28px;border-radius:8px;background:var(--blue);display:grid;place-items:center;font-style:normal;color:#fff}
+.nt .hd small{margin-left:auto;font-weight:400;color:var(--mut)}
+.nt dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px}.nt dt{color:var(--mut)}
+.nt .bt{display:flex;gap:8px;margin-top:10px}.nt .bt button{flex:1;padding:9px;border-radius:10px;color:#fff;font-weight:700}
+@keyframes pop{from{transform:translateY(-14px) scale(.96);opacity:0}}
+:root{--wa:#0a7d68;--wag:#25d366}
+body{font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:radial-gradient(circle at 20% 0,#16356b,#07142e 62%);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:14px;gap:12px}
+*{box-sizing:border-box;margin:0;padding:0}button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid #60a5fa;outline-offset:2px}
+.stage{display:flex;gap:30px;justify-content:center}
+.dev{display:flex;flex-direction:column;align-items:center;gap:8px}.cap{color:#fff;font-weight:700}.cap small{opacity:.6;font-weight:400;margin-left:6px}
+.phone{position:relative;width:380px;height:min(740px,calc(100vh - 190px));min-height:560px;background:#fff;border:9px solid #0b1220;border-radius:38px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 70px #0009}
+.hd{display:flex;align-items:center;gap:10px;padding:12px 14px;color:#fff}.hd h1{font-size:19px;flex:1}.hd small{display:block;font-size:11.5px;opacity:.85;font-weight:400}
+.wa .hd{background:var(--wa)}.ai .hd{background:linear-gradient(100deg,var(--navy),#134aa0 55%,var(--purple))}
+.body{flex:1;overflow:auto;min-height:0;position:relative}.pad{padding:12px}
+.nav{display:flex;border-top:1px solid var(--line);background:#fff}.nav button{flex:1;padding:9px 2px;font-size:11.5px;font-weight:600;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:1px}
+.nav button i{font-style:normal;font-size:18px}.wa .nav button.on{color:var(--wa)}.ai .nav button.on{color:var(--blue)}
+.wsearch{margin:8px 12px;padding:9px 14px;border:0;border-radius:99px;background:#f0f2f5;width:calc(100% - 24px)}
+.av{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:700}.av.sm{width:38px;height:38px;font-size:13px}.av.xl{width:120px;height:120px;font-size:38px}
+.row{display:flex;gap:12px;align-items:center;padding:10px 14px;cursor:pointer;width:100%}.row:hover{background:#f6f8fa}.row .n{flex:1;min-width:0}
+.row .r{display:flex;justify-content:space-between;gap:6px}.row small{color:var(--mut);font-size:11.5px}
+.row p{color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{padding:8px 14px 2px;font-weight:700;color:var(--wa);font-size:13px}
+.ring{padding:2.5px;border-radius:50%;background:conic-gradient(var(--wag),#128c7e,var(--wag))}.ring.seen{background:#cbd5e1}.ring .av{border:2.5px solid #fff}
+.plus{position:relative}.plus::after{content:"+";position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:var(--wag);color:#fff;display:grid;place-items:center;font-weight:700;border:2px solid #fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px}.chips button{background:#e7f8ef;color:#0a7d68;padding:6px 12px;border-radius:99px;font-weight:600;font-size:12.5px}
+.ov{position:absolute;inset:0;display:none;flex-direction:column;z-index:5;background:#fff}.ov.show{display:flex;animation:pop .25s ease-out}
+.msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:5px;background:#efeae2}
+.b{max-width:80%;padding:6px 10px 4px;border-radius:10px;border-top-left-radius:2px;background:#fff;align-self:flex-start;box-shadow:0 1px 1px #0002;word-wrap:break-word}
+.b.me{align-self:flex-end;background:#d9fdd3;border-radius:10px;border-top-right-radius:2px}.b .s{font-size:12px;font-weight:700}
+.b .tm{float:right;margin:6px 0 0 10px;font-size:10.5px;color:var(--mut)}.b .tm i{font-style:normal;color:#53bdeb}
+.comp{display:flex;gap:8px;padding:8px;background:#f0f2f5;align-items:center}.comp input{flex:1;min-width:0;padding:11px 14px;border:0;border-radius:99px}
+.comp select{padding:9px 6px;border:0;border-radius:10px;background:#fff;font-weight:600;color:var(--wa);max-width:78px}
+.send{width:44px;height:44px;border-radius:50%;background:var(--wa);color:#fff;flex:none;font-size:16px}
+.hd button{font-size:19px;padding:2px 5px}
+#callui{background:linear-gradient(#0b3b36,#06201d);color:#fff;justify-content:space-between;align-items:center;padding:60px 20px 40px;text-align:center;z-index:7}
+#callui .cbk{display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;width:100%}#callui p{opacity:.8;font-size:16px}
+.pip{position:absolute;right:0;top:-30px;width:80px;height:110px;border-radius:12px;background:#ffffff26;display:grid;place-items:center;font-size:12px}
+.cbt{display:flex;gap:18px}.cbt button{width:62px;height:62px;border-radius:50%;background:#ffffff26;font-size:22px}.cbt .rd{background:#ef4444}.cbt .gr{background:#22c55e}.cbt .act{background:#fff;color:#000}
+#stv,#stc{z-index:8;color:#fff}.bars{display:flex;gap:4px;padding:12px 10px 4px;position:relative;z-index:3}.bars span{flex:1;height:3px;background:#fff5;border-radius:9px;overflow:hidden}
+.bars i{display:block;height:100%;background:#fff;width:0}.bars i.full{width:100%}.bars i.run{animation:fill 4s linear forwards}@keyframes fill{to{width:100%}}
+.svh{display:flex;align-items:center;gap:10px;padding:8px 12px;position:relative;z-index:3}.svh small{flex:1;opacity:.8}.svh button{font-size:20px}
+.svt{position:absolute;inset:0;display:grid;place-items:center;padding:30px;font-size:26px;font-weight:600;text-align:center}
+.z{position:absolute;top:70px;bottom:0;width:50%;z-index:2}.z.l{left:0}.z.r{right:0}
+#stc textarea{flex:1;background:none;border:0;resize:none;font-size:26px;font-weight:600;text-align:center;padding:30px;color:#fff;outline:0}#stc textarea::placeholder{color:#fff9}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid #fff}.fab{position:absolute;right:16px;bottom:16px}
+#consent{background:#0007;justify-content:flex-end;z-index:9}.sheet{background:#fff;border-radius:22px 22px 0 0;padding:18px;max-height:92%;overflow:auto}
+.sheet h3{font-size:17px;margin:4px 0 6px}.sheet p{color:#475569;font-size:13px;margin-bottom:8px}.perm{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}.perm span{flex:1;font-weight:600}
+.tg{width:42px;height:24px;border-radius:99px;background:#cbd5e1;position:relative;transition:.2s;flex:none}.tg::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.tg.on{background:var(--green)}.tg.on::after{left:21px}
+.actions{display:flex;gap:8px;margin-top:12px}.actions .btn{flex:1;padding:11px}.link{display:block;margin:10px auto 0;color:var(--red);font-weight:600}
+.card{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 14px;display:flex;gap:12px;align-items:center}
+.tk .row{padding:0;cursor:default;width:auto}.tk .row:hover{background:none}
+.hero{text-align:center;padding:30px 18px}.hero .big{font-size:54px}.hero h2{margin:8px 0}.hero ul{text-align:left;margin:14px 6px;padding-left:18px;color:#334155;display:grid;gap:6px}.hero .btn{padding:12px 22px;font-size:15px;margin-top:6px}
+#toasts{position:absolute;top:58px;left:8px;right:8px;z-index:6;display:flex;flex-direction:column;gap:8px;max-height:75%;overflow:auto}
+.demo{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;background:#ffffff14;border:1px solid #ffffff2a;color:#fff;border-radius:16px;padding:10px 14px;max-width:900px}
+.demo input,.demo select{padding:8px 10px;border-radius:10px;border:0;color:var(--ink)}.demo input{width:260px;max-width:100%}.demo button{background:#ffffff26;padding:7px 11px;border-radius:10px;font-weight:600;font-size:12.5px}.demo .btn{background:var(--blue)}
+.bridge{font-weight:600;padding:6px 12px;border-radius:99px;background:#ffffff1f}.bridge.ok{background:#16a34a55}.bridge.no{background:#dc262655}
+#alarm{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:radial-gradient(circle at 50% 25%,#1e3a8a,#0b1020 72%);color:#fff;padding:16px;overflow:auto}#alarm.show{display:grid}
+.ac{width:min(440px,100%);text-align:center}.ac h2{font-size:15px;font-weight:600;opacity:.85}.atime{font-size:58px;font-weight:300;line-height:1.1}
+.bell{width:96px;height:96px;margin:30px auto 40px;border-radius:50%;background:var(--orange);display:grid;place-items:center;font-size:46px;position:relative;animation:ring .8s ease-in-out infinite}
+.bell.od{background:var(--red)}.bell::before,.bell::after{content:"";position:absolute;inset:0;border-radius:50%;border:3px solid currentColor;color:var(--orange);animation:rip 1.6s ease-out infinite}.bell.od::before,.bell.od::after{color:var(--red)}.bell::after{animation-delay:.8s}
+@keyframes ring{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(16deg)}25%{transform:rotate(-14deg)}40%{transform:rotate(10deg)}50%{transform:rotate(-6deg)}}@keyframes rip{to{transform:scale(1.9);opacity:0}}
+.atitle{font-size:26px;font-weight:700;margin:6px 0}.ad{background:#ffffff14;border-radius:16px;padding:12px 14px;text-align:left;margin:14px 0;display:grid;grid-template-columns:auto 1fr;gap:3px 14px}.ad dt{opacity:.7}
+.aq{font-size:13px;opacity:.75;font-style:italic}.abt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.abt button{padding:17px 10px;border-radius:16px;font-weight:700;font-size:16px;color:#fff}
+.amu{margin-top:12px;opacity:.8;font-size:13px;text-decoration:underline}.ahint{margin-top:8px;font-size:12px;color:#fcd34d}
+.demo button.on{background:#fff;color:var(--navy)}.stage[data-v=wa] .dev.a,.stage[data-v=ai] .dev.w{display:none}
+#flash{position:absolute;left:10px;right:10px;bottom:70px;z-index:6;background:#0b2a5b;color:#fff;border-radius:12px;padding:9px 12px;font-size:12.5px;display:none;box-shadow:0 8px 24px #0006}
+@media(max-width:860px){.stage .dev{display:none}.stage[data-v=wa] .dev.w,.stage[data-v=ai] .dev.a,.stage[data-v=both] .dev.w{display:flex}.vt{display:inline-flex}.phone{width:min(380px,calc(100vw - 24px))}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage" data-v="wa">
+ <section class="dev w"><div class="cap">ChatApp <small>messaging app</small></div>
+  <div class="phone wa">
+   <div class="hd"><h1 id="wtitle">ChatApp</h1></div>
+   <input class="wsearch" id="wsearch" placeholder="Search chats and messages" aria-label="Search">
+   <div class="body" id="wbody"></div>
+   <div class="nav" id="wnav"><button data-wt="chats"><i>💬</i>Chats</button><button data-wt="upd"><i>⭕</i>Updates</button><button data-wt="calls"><i>📞</i>Calls</button><button data-wt="set"><i>⚙️</i>Settings</button></div>
+   <div class="ov" id="conv"></div><div class="ov" id="callui"></div><div class="ov" id="stv"></div><div class="ov" id="stc"></div><div class="ov" id="consent"></div>
+  </div></section>
+ <section class="dev a"><div class="cap">SmartChat AI <small>separate assistant app</small></div>
+  <div class="phone ai">
+   <div class="hd"><div style="font-size:26px">✨</div><h1>SmartChat AI<small id="asub"></small></h1><div id="clock" style="font-size:11.5px;opacity:.85;text-align:right;max-width:120px"></div></div>
+   <div class="body" id="abody"></div>
+   <div class="nav" id="anav"><button data-at="tasks"><i>✅</i>Tasks</button><button data-at="access"><i>🔐</i>Access</button><button data-at="log"><i>🕘</i>Activity</button></div>
+   <div id="toasts" aria-live="polite"></div><div id="flash"></div>
+  </div></section>
+</div>
+<div class="demo"><button class="vt" data-view="wa">ChatApp</button><button class="vt" data-view="ai">SmartChat AI</button><button id="tst">🔔 Test alarm</button><button data-t="1">+1 h</button><button data-t="24">+1 day</button></div>
+<div id="alarm" role="alertdialog" aria-live="assertive" aria-label="Task alarm"></div>
+<script>
+const $=s=>document.querySelector(s),H=36e5,D=864e5;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+let S,flt='all';
+const now=()=>Date.now()+S.off,uid=()=>'i'+(S.seq++);
+const save=()=>{try{localStorage.setItem('chatapp-suite',JSON.stringify(S))}catch(e){}};
+const fd=(t,h=true)=>new Date(t).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',...(h?{hour:'numeric',minute:'2-digit',hour12:true}:{})});
+const ft=t=>new Date(t).toLocaleTimeString('en-GB',{hour:'numeric',minute:'2-digit',hour12:true});
+function rem(ms){if(ms<=0)return'Deadline passed';const d=Math.floor(ms/D),h=Math.floor(ms%D/H),m=Math.floor(ms%H/6e4);return d?`${d} day${d>1?'s':''}${h?' '+h+' h':''}`:h?`${h} h ${m} min`:`${m} min`}
+const log=(ic,tx)=>{S.log.unshift({t:now(),ic,tx});S.log.length=Math.min(S.log.length,80)};
+
+
+//NLP-START  (rule-based stand-in for spaCy / dateparser / classifier; swap for the real FastAPI pipeline later)
+const MON=['january','february','march','april','may','june','july','august','september','october','november','december'];
+const DAYS=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+const NUM={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,an:1,a:1};
+const ACT=/\b(submit\w*|due|deadline|complete\w*|finish\w*|exam|test|quiz|meeting|assignment|project|pay|fees?|attend|bring|upload|register|review|postponed|extended|rescheduled|prepare|report|starts?)\b/i;
+const STRONG=/\b(submit|complete|finish|due|deadline|must|need to|have to|pay|bring|attend|upload|prepare|starts?)\b/i;
+const NOT=/\?\s*$|^(who|what|when|where|why|how|can|could|did|do|does|is|are|will)\b|\b(if|maybe|might|would|wish|suppose)\b|^["“]/i;
+const CHG=/\b(extended|postponed|preponed|rescheduled|moved|changed|pushed|advanced|shifted)\b/i;
+const STOP=new Set('this that your with from have been will deadline extended postponed rescheduled moved changed pushed shifted date students please october january february march april june july august september november december'.split(' '));
+function parseWhen(t,base){
+ const s=t.toLowerCase(),b=new Date(base);let m,hh=null,mm=0,inf=false,amb=false,day=null;
+ if(m=s.match(/(?:within|in)\s+(?:the\s+)?(?:next\s+)?(\d+|one|two|three|four|five|six|seven|eight|nine|ten|an?)\s+(hour|minute|day)s?/))
+  return{at:base+(NUM[m[1]]||+m[1])*{hour:H,minute:6e4,day:D}[m[2]],hasTime:m[2]!='day'};
+ if(m=s.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/)){hh=+m[1]%12+(m[3]=='pm'?12:0);mm=+(m[2]||0)}
+ else if(/morning/.test(s)){hh=9;inf=true}else if(/evening/.test(s)){hh=18;inf=true}
+ if(/\btoday\b|tonight/.test(s))day=new Date(b);
+ else if(/\btomorrow\b/.test(s)){day=new Date(b);day.setDate(b.getDate()+1)}
+ else if(m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)){day=new Date(+m[3],m[2]-1,+m[1]);if(+m[1]<=12&&+m[2]<=12&&m[1]!=m[2])amb=true}
+ else if(m=s.match(new RegExp('(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?('+MON.join('|')+')(?:,?\\s*(\\d{4}))?')))day=new Date(+(m[3]||b.getFullYear()),MON.indexOf(m[2]),+m[1]);
+ else if(m=s.match(new RegExp('('+MON.join('|')+')\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s*(\\d{4}))?')))day=new Date(+(m[3]||b.getFullYear()),MON.indexOf(m[1]),+m[2]);
+ else if(m=s.match(new RegExp('\\b('+DAYS.join('|')+')\\b'))){day=new Date(b);day.setDate(b.getDate()+((DAYS.indexOf(m[1])-b.getDay()+7)%7||7))}
+ else if(hh!==null&&!inf)day=new Date(b);
+ if(!day)return null;
+ if(hh===null){day.setHours(23,59,0,0);return{at:+day,hasTime:false,amb}}
+ day.setHours(hh,mm,0,0);return{at:+day,hasTime:true,amb,inf};
+}
+function title(t){
+ let s=t.replace(/^\s*(students|everyone|all|team|guys|hi|hello|dear \w+)[,:!]?\s*/i,'').replace(/^please\s+/i,'');
+ let m=s.match(/^(?:your|the)?\s*(.+?)\s+(?:must|should|has to|have to|needs to|need to)\s+be\s+(submitted|completed|finished|paid|done)/i);
+ if(m)return({submitted:'Submit',completed:'Complete',finished:'Finish',paid:'Pay',done:'Complete'}[m[2].toLowerCase()])+' '+m[1].replace(/^(your|the)\s+/i,'');
+ m=s.match(/\b(submit|complete|finish|prepare|attend|pay|bring|upload|send|register|write|review|revise|fill)\b\s+([^.!?,]*)/i);
+ if(m)return cap(m[1])+' '+m[2].split(/\s+(?:on|by|before|within|due|until|at|in the next|tomorrow|today|next|this|as soon|asap)\b/i)[0].replace(/^(your|the)\s+/i,'').trim()||cap(m[1]);
+ return cap(s.split(/\s+(?:starts?|is|are|will|has|have|was|begins?)\b/i)[0].replace(/^(the|your)\s+/i,''));
+}
+const cat=s=>/exam|test|quiz/i.test(s)?'Exam':/assignment/i.test(s)?'Assignment':/project|submission/i.test(s)?'Project':/meeting|review|call/i.test(s)?'Meeting':/fee|pay/i.test(s)?'Fees':/attendance/i.test(s)?'Attendance':'Task';
+function analyze(text,t){
+ const s=text.trim();if(NOT.test(s))return{why:'question, hypothetical or quote'};
+ const w=parseWhen(s,t),asap=/as soon as possible|\basap\b|urgent|immediately/i.test(s);
+ if(!ACT.test(s)||(!w&&!STRONG.test(s)&&!asap))return{why:'ordinary conversation'};
+ const ex=s.match(/remind me (\w+) (hour|day)s? before/i),aud=/students|class/i.test(s)?'All students':/team/i.test(s)?'Project team':/everyone|all\b/i.test(s)?'Everyone':'Not specified';
+ const conf=Math.min(.98,.55+(w?(w.amb||w.inf?.1:.3):0)+(STRONG.test(s)?.1:0)+(aud!='Not specified'?.05:0));
+ return{task:1,title:title(s),at:w&&w.at,hasTime:w&&w.hasTime,amb:w&&w.amb,inf:w&&w.inf,asap,cat:cat(s),aud,conf,change:CHG.test(s),
+  ex:ex?(NUM[ex[1].toLowerCase()]||+ex[1])*(ex[2]=='hour'?H:D):0,
+  pri:/exam|project|urgent|asap|final|submission/i.test(s)||(w&&w.at-t<3*D)?'High':'Medium'};
+}
+function plan(at,hasTime,ex){ // reminder policy from the spec
+ const n=now();if(at<=n)return null;let r=[];
+ if(ex)r.push([at-ex,'custom']);
+ else if(at-n<=D)r.push([at-H,'final']);
+ else{const d=new Date(at);d.setHours(9,0,0,0);r.push([hasTime?at-2*D:+d-2*D,'primary']);if(hasTime)r.push([at-H,'final'])}
+ return r.map(([a,k])=>({at:Math.max(a,n+3000),kind:k,done:false}));
+}
+
+function sched(t){
+ t.rem.forEach(r=>{if(!r.done)r.done='cancelled'});
+ if(!t.at)return;const p=plan(t.at,t.hasTime,t.ex);if(p){t.rem.push(...p);log('⏰',`Reminders for “${t.title}”: ${p.map(r=>fd(r.at)).join(' and ')}`);flash(`⏰ Alarm set for “${t.title}”: rings ${fd(p[0].at)}`)}
+}
+function mk(c,m,a,at,h){
+ const t={id:uid(),title:a.title,msg:m.text,from:m.from,chat:c,sent:m.t,at,hasTime:h,cat:a.cat,pri:a.pri,aud:a.aud,conf:a.conf,ex:a.ex,status:'pending',rem:[],hist:[]};
+ S.tasks.unshift(t);sched(t);log('✅',`Task created: “${t.title}” from ${m.from} in ${chat(c).name}`);return t;
+}
+const chat=id=>S.chats.find(c=>c.id==id)||{name:'Manual',id:'manual'};
+function applyChange(t,at,h,text){
+ t.hist.push({from:t.at,to:at,when:now(),msg:text});const old=t.at;t.at=at;t.hasTime=h;if(t.status=='overdue'&&at>now())t.status='pending';
+ sched(t);log('🔄',`Deadline changed for “${t.title}”: ${old?fd(old,t.hasTime):'none'} → ${fd(at,h)}`);
+ S.notifs.push({id:uid(),tid:t.id,kind:'change',old,when:now()});
+}
+function ingest(c,m){
+ if(!(S.connected&&S.perm[c.id])||(m.from=='You'&&S.own===false))return;
+ const key=c.id+'|'+m.text.toLowerCase().replace(/\W+/g,' ').trim();
+ if(S.seen[key]){log('♻️','Duplicate message ignored');return}S.seen[key]=1;
+ const a=analyze(m.text,m.t);
+ if(!a.task){log('🙈',`Skipped (${a.why}): “${m.text.slice(0,40)}”`);return}
+ if(a.change&&a.at){
+  const tk=new Set(m.text.toLowerCase().match(/[a-z]{4,}/g).filter(w=>!STOP.has(w)));
+  const sc=S.tasks.filter(t=>t.chat==c.id&&t.status!='done').map(t=>({t,n:(t.title+' '+t.msg).toLowerCase().match(/[a-z]{4,}/g).filter(w=>tk.has(w)&&!STOP.has(w)).length})).filter(x=>x.n>0).sort((x,y)=>y.n-x.n);
+  if(sc.length==1||(sc.length>1&&sc[0].n>sc[1].n)){applyChange(sc[0].t,a.at,a.hasTime,m.text);m.ai='upd';return}
+  if(sc.length>1){S.confirm.push({id:uid(),kind:'change',cands:sc.slice(0,3).map(x=>x.t.id),at:a.at,h:a.hasTime,text:m.text,note:'This update could match more than one task.'});m.ai='cf';log('❓','Ambiguous deadline update — needs your confirmation');return}
+ }
+ const note=!a.at?(a.asap?'No exact deadline (“as soon as possible”).':'No deadline found.'):a.amb?'Date format is ambiguous (DD/MM or MM/DD?).':a.inf?'Time of day was inferred.':a.at<=now()?'This deadline has already passed.':a.conf<.6?'Low confidence.':'';
+ if(note){S.confirm.push({id:uid(),kind:'task',chat:c.id,m:{text:m.text,from:m.from,t:m.t},a,at:a.at||null,note});m.ai='cf';log('❓',`Needs confirmation: “${a.title}” — ${note}`)}
+ else{mk(c.id,m,a,a.at,a.hasTime);m.ai='task'}
+}
+
+function tick(){
+ const n=now(),hr=new Date(n).getHours(),Q=S.quiet,quiet=Q[0]!=Q[1]&&(Q[0]<Q[1]?hr>=Q[0]&&hr<Q[1]:hr>=Q[0]||hr<Q[1]);let ch=0;
+ for(const t of S.tasks){if(t.status=='done')continue;
+  if(t.at&&t.at<n&&t.status=='pending'){t.status='overdue';S.notifs=S.notifs.filter(x=>x.tid!=t.id);S.notifs.push({id:uid(),tid:t.id,kind:'overdue',when:n});log('⚠️',`“${t.title}” is overdue`);ch=1}
+  if(!quiet)for(const r of t.rem)if(!r.done&&r.at<=n){r.done='sent';S.notifs=S.notifs.filter(x=>!(x.tid==t.id&&x.kind=='reminder'));S.notifs.push({id:uid(),tid:t.id,kind:'reminder',when:n});log('🔔',`Reminder sent: “${t.title}”`);
+   try{if(Notification.permission=='granted')new Notification('SmartChat AI — Task Reminder',{body:t.title+(t.at?' · due '+fd(t.at,t.hasTime):'')})}catch(e){}ch=1}}
+ $('#clock').textContent=fd(n);if(ch){save();render()}
+}
+function finish(id){const t=S.tasks.find(x=>x.id==id);if(!t)return;t.status='done';t.doneAt=now();t.rem.forEach(r=>{if(!r.done)r.done='cancelled'});S.notifs=S.notifs.filter(x=>x.tid!=id);log('🏁',`Finished: “${t.title}” — all reminders cancelled`);save();render()}
+function willDo(id){
+ const t=S.tasks.find(x=>x.id==id),n=now();S.notifs=S.notifs.filter(x=>x.tid!=id);let at=n+S.snooze*H,why=`in ${S.snooze} h`;
+ if(t.at&&t.at>n&&at>=t.at-6e5){const left=t.at-n;if(left>30*6e4){at=t.at-Math.min(30*6e4,left/2);why='before the deadline (deadline-aware)'}else at=0}
+ if(at){t.rem.push({at,kind:'follow-up',done:false});log('⏳',`“${t.title}” stays pending — next reminder ${fd(at)} (${why})`)}
+ else log('⏳',`“${t.title}” stays pending — deadline is very close, it will be marked overdue if missed`);
+ save();render();
+}
+
+
+function taskCard(t){
+ const n=now(),c=chat(t.chat),nx=t.status!='done'&&t.rem.filter(r=>!r.done).sort((a,b)=>a.at-b.at)[0];
+ return`<div class="tk ${t.status=='done'?'done':t.pri}"><h4>${esc(t.title)}</h4>
+ <div class="row"><span class="pill ${t.status}">${t.status}</span><span class="pill ${t.pri}">${t.pri}</span><span class="pill">${esc(t.cat)}</span></div>
+ <div class="meta">From <b>${esc(t.from)}</b> · ${esc(c.name)}<br>Deadline: <b>${t.at?fd(t.at,t.hasTime):'Not set'}</b>${t.at&&t.status!='done'?` · ${rem(t.at-n)}`:''}${nx?`<br>⏰ Next alarm: <b>${fd(nx.at)}</b>`:''}<br>Audience: ${esc(t.aud)} · Confidence ${Math.round(t.conf*100)}%</div>
+ <q>${esc(t.msg)}</q>${t.hist.map(h=>`<div class="hist">🔄 ${h.from?fd(h.from):'none'} → ${fd(h.to)}</div>`).join('')}
+ <div class="acts">${t.status=='done'?`<button data-re="${t.id}">Reopen</button>`:`<button class="f" data-fin="${t.id}">Finished</button><button data-wd="${t.id}">I'll do it</button>`}<button data-del="${t.id}">Delete</button></div></div>`;
+}
+
+function renderToasts(){
+ $('#toasts').innerHTML=S.notifs.filter(x=>x.kind=='change').map(x=>{const t=S.tasks.find(k=>k.id==x.tid);if(!t)return'';const c=chat(t.chat),n=now();
+  const ttl={reminder:'Deadline Reminder',overdue:'Task Overdue',change:'Deadline Changed'}[x.kind];
+  return`<div class="nt ${x.kind}"><div class="hd"><i>${x.kind=='change'?'🔄':'🔔'}</i>SmartChat AI — ${ttl}<small>${ft(x.when)}</small></div><dl>
+  <dt>Task</dt><dd><b>${esc(t.title)}</b></dd><dt>From</dt><dd>${esc(t.from)}</dd><dt>Chat</dt><dd>${esc(c.name)}</dd>
+  <dt>Deadline</dt><dd>${t.at?fd(t.at,t.hasTime):'Not set'}</dd>${x.kind=='change'?`<dt>Was</dt><dd>${x.old?fd(x.old):'—'}</dd>`:`<dt>Remaining</dt><dd>${t.at?rem(t.at-n):'—'}</dd>`}<dt>Priority</dt><dd>${t.pri}</dd></dl>
+  <q style="display:block;font-size:12px;color:var(--mut);margin-top:6px;quotes:none">“${esc(t.msg)}”</q>
+  <div class="bt">${x.kind=='change'?`<button style="background:var(--purple)" data-ok="${x.id}">Got it</button>`:`<button style="background:var(--green)" data-fin="${t.id}">Finished</button><button style="background:var(--blue)" data-wd="${t.id}">I'll do it</button>`}</div></div>`}).join('');
+}
+
+
+const IDX=n=>[...n].reduce((a,c)=>a+c.charCodeAt(0),0)%6,AVC=['#1a73e8','#16a34a','#7c3aed','#f59e0b','#ec4899','#0891b2'];
+const av=(n,sz='')=>`<div class="av ${sz}" style="background:${AVC[IDX(n)]}">${esc(n.replace(/\(.*?\)/g,'').trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>`;
+const BG=['#075e54','#7c3aed','#1a73e8','#db2777','#ea580c','#0f766e'],CONTACTS=['Staff','Priya','Arun','Meena'];
+let asWho='Staff',wTab='chats',open=null,call=null,sv=null,consent=null,stc=null,aTab='tasks',q='',cT=null,svT=null,mute=0,spk=0;
+const lastT=c=>c.msgs.length?c.msgs[c.msgs.length-1].t:0;
+const dur=c=>{const s=Math.floor((Date.now()-c.t0)/1e3);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const fmtD=s=>s?`${Math.floor(s/60)}m ${s%60}s`:'';
+
+/* ---------- ChatApp ---------- */
+function chatList(){const ql=q.toLowerCase();
+ return[...S.chats].filter(c=>!ql||c.name.toLowerCase().includes(ql)||c.msgs.some(m=>m.text.toLowerCase().includes(ql))).sort((a,b)=>lastT(b)-lastT(a)).map(c=>{const l=c.msgs[c.msgs.length-1];
+ return`<div class="row" data-open="${c.id}">${av(c.name)}<div class="n"><div class="r"><b>${esc(c.name)}</b><small>${l?ft(l.t):''}</small></div><p>${l?(l.from=='You'?'✓✓ ':c.type=='group'?esc(l.from)+': ':'')+esc(l.text):'Say hi 👋'}</p></div></div>`}).join('')||'<div class="empty">No chats match your search.</div>'}
+function renderWA(){
+ const T={chats:'ChatApp',upd:'Updates',calls:'Calls',set:'Settings'};$('#wtitle').textContent=T[wTab];$('#wsearch').style.display=wTab=='chats'?'block':'none';
+ document.querySelectorAll('#wnav button').forEach(b=>b.classList.toggle('on',b.dataset.wt==wTab));let h='';
+ if(wTab=='chats')h=chatList();
+ else if(wTab=='upd'){const o=S.status.filter(s=>s.who!='You'&&s.items.length);
+  h=`<div class="row" data-stc="1"><div class="plus">${av('You')}</div><div class="n"><b>My status</b><p>Tap to add a status update</p></div></div><div class="sub">Recent updates</div>`+
+  (o.map(s=>`<div class="row" data-sv="${s.who}"><div class="ring ${s.seen?'seen':''}">${av(s.who)}</div><div class="n"><b>${esc(s.who)}</b><p>${s.items.length} update${s.items.length>1?'s':''} · ${ft(s.items[s.items.length-1].t)}</p></div></div>`).join('')||'<div class="empty">No updates yet.</div>')}
+ else if(wTab=='calls'){h=`<div class="sub">Start a call</div><div class="chips">${CONTACTS.map(n=>`<button data-call="${n}|voice">📞 ${n}</button>`).join('')}</div><div class="sub">Recent</div>`+
+  S.calls.map(c=>`<div class="row" data-call="${c.who}|voice">${av(c.who)}<div class="n"><b style="color:${c.dir=='miss'?'var(--red)':'inherit'}">${esc(c.who)}</b><p>${{out:'↗ Outgoing',in:'↙ Incoming',miss:'↙ Missed'}[c.dir]} · ${fd(c.t,false)}, ${ft(c.t)} ${fmtD(c.dur)}</p></div><span style="font-size:20px">📞</span></div>`).join('')}
+ else{const n=Object.values(S.perm).filter(Boolean).length;h=`<div class="row" style="cursor:default">${av('You')}<div class="n"><b>You</b><p>Hey there! I am using ChatApp.</p></div></div><div class="sub">Connected apps</div>
+  <div class="card"><div style="font-size:30px">✨</div><div style="flex:1"><b>SmartChat AI</b><br><small style="color:var(--mut)">${S.connected?`Can read ${n} of ${S.chats.length} chats`:'Not connected'}</small></div><button class="btn" data-consent="1">${S.connected?'Manage':'Connect'}</button></div>
+  <p style="margin:6px 18px;color:var(--mut);font-size:12.5px">Permissions are enforced here, inside ChatApp. A chat you do not share is never sent to any connected app, and you can revoke access at any time.</p>`}
+ $('#wbody').innerHTML=h;renderConv();
+}
+function renderConv(){
+ const el=$('#conv'),c=open&&S.chats.find(x=>x.id==open);el.classList.toggle('show',!!c);if(!c){el.dataset.id='';return}
+ const key=open+(S.connected&&S.perm[c.id]?'1':'0'),WH=c.type=='group'?['Staff','Priya','Arun','You']:['Staff','You'];if(!WH.includes(asWho))asWho=WH[0];
+ if(el.dataset.id!=key){el.dataset.id=key;el.innerHTML=`<div class="hd" style="background:var(--wa)"><button data-back="1" aria-label="Back">←</button>${av(c.name,'sm')}<h1 style="font-size:16px">${esc(c.name)}<small>${c.type=='group'?c.members+' members':'online'} · ✨ AI ${S.connected&&S.perm[c.id]?'on':'off'}</small></h1><button data-vc="video" aria-label="Video call">🎥</button><button data-vc="voice" aria-label="Voice call">📞</button></div><div class="msgs" id="msgs"></div><div class="comp"><select id="who" aria-label="Send as" title="Send as">${WH.map(w=>`<option ${w==asWho?'selected':''}>${w}</option>`).join('')}</select><input id="in" placeholder="Message" autocomplete="off"><button class="send" id="sb" aria-label="Send">➤</button></div>`}
+ const box=$('#msgs');box.innerHTML=c.msgs.map(m=>`<div class="b ${m.from=='You'?'me':''}">${m.from!='You'&&c.type=='group'?`<div class="s" style="color:${AVC[IDX(m.from)]}">${esc(m.from)}</div>`:''}${esc(m.text)}<span class="tm">${ft(m.t)}${m.from=='You'?' <i>✓✓</i>':''}</span></div>`).join('');box.scrollTop=box.scrollHeight;
+}
+function renderCall(){const el=$('#callui');el.classList.toggle('show',!!call);if(!call)return;const st=call.state;
+ const tx=st=='calling'?'Calling…':st=='incoming'?(call.video?'Incoming video call':'Incoming voice call'):`<span id="ct">${dur(call)}</span>`;
+ el.innerHTML=`<div class="cbk">${av(call.who,'xl')}<h2>${esc(call.who)}</h2><p>${tx}</p>${call.video&&st=='on'?'<div class="pip">You</div>':''}</div><div class="cbt">`+(st=='incoming'?`<button class="rd" data-dec="1" aria-label="Decline">✕</button><button class="gr" data-acc="1" aria-label="Accept">📞</button>`:`<button class="${mute?'act':''}" data-mute="1" aria-label="Mute">🎙️</button><button class="${spk?'act':''}" data-spk="1" aria-label="Speaker">🔊</button><button class="rd" data-end="1" aria-label="End call">✕</button>`)+`</div>`}
+function startCall(who,video){call={who,video,state:'calling',dir:'out'};mute=spk=0;renderCall();clearTimeout(cT);cT=setTimeout(()=>{if(call&&call.state=='calling'){call.state='on';call.t0=Date.now();renderCall()}},2000)}
+function endCall(miss){if(!call)return;clearTimeout(cT);const d=call.state=='on'?Math.floor((Date.now()-call.t0)/1e3):0;S.calls.unshift({id:uid(),who:call.who,dir:miss?'miss':call.dir,t:now(),dur:d});call=null;renderCall();save();renderWA()}
+function openSV(w){const s=S.status.find(x=>x.who==w);sv={w,i:0};s.seen=1;svGo()}
+function svGo(){clearTimeout(svT);renderSV();svT=setTimeout(()=>svStep(1),4000)}
+function svStep(d){const s=S.status.find(x=>x.who==sv.w);sv.i=Math.max(0,sv.i+d);if(sv.i>=s.items.length){svClose();return}svGo()}
+function svClose(){clearTimeout(svT);sv=null;renderSV();save();renderWA()}
+function renderSV(){const el=$('#stv');el.classList.toggle('show',!!sv);if(!sv)return;const s=S.status.find(x=>x.who==sv.w),it=s.items[sv.i];el.style.background=it.bg;
+ el.innerHTML=`<div class="bars">${s.items.map((_,i)=>`<span><i class="${i<sv.i?'full':i==sv.i?'run':''}"></i></span>`).join('')}</div><div class="svh">${av(s.who,'sm')}<b>${esc(s.who)}</b><small>${ft(it.t)}</small><button data-svx="1" aria-label="Close">✕</button></div><div class="svt">${esc(it.text)}</div><div class="z l" data-svn="-1"></div><div class="z r" data-svn="1"></div>`}
+function renderSTC(){const el=$('#stc');el.classList.toggle('show',!!stc);if(!stc)return;el.style.background=stc.bg;
+ el.innerHTML=`<div class="svh"><button data-stx="1" aria-label="Close">✕</button><span style="flex:1"></span>${BG.map(b=>`<button class="dot" style="background:${b}" data-stbg="${b}" aria-label="Colour"></button>`).join('')}</div><textarea id="stt" placeholder="Type a status" maxlength="120"></textarea><button class="send fab" data-stpost="1" aria-label="Post">➤</button>`;$('#stt').value=stc.text||''}
+function renderConsent(){const el=$('#consent');el.classList.toggle('show',!!consent);if(!consent)return;
+ el.innerHTML=`<div class="sheet"><div style="font-size:34px">✨</div><h3>SmartChat AI wants to read selected chats</h3><p>It will receive new messages (plus the last 24 hours) from the chats you switch on, to find tasks and deadlines. Only the extracted task is stored. Chats you leave off are never shared, and you can change this any time.</p>${S.chats.map(c=>`<div class="perm" data-ct="${c.id}"><span>${esc(c.name)}</span><div class="tg ${consent[c.id]?'on':''}"></div></div>`).join('')}<div class="actions"><button class="btn o" data-cc="1">Cancel</button><button class="btn g" data-ca="1">Allow selected</button></div>${S.connected?'<button class="link" data-disc="1">Disconnect SmartChat AI</button>':''}</div>`}
+function allow(){const old=S.perm;S.perm={...consent};S.connected=true;
+ S.chats.forEach(c=>{if(S.perm[c.id]&&!old[c.id]){log('🔓',`ChatApp granted access to ${c.name}`);c.msgs.filter(m=>m.t>now()-D).forEach(m=>ingest(c,m))}else if(!S.perm[c.id]&&old[c.id])log('🔒',`Access revoked for ${c.name}: analysis stopped`)});
+ consent=null;bridge('🔗 Access updated by ChatApp',1);save();render();tick()}
+
+/* ---------- bridge: ChatApp -> AI, permission checked on the ChatApp side ---------- */
+function bridge(){}
+function syncView(){const v=$('#stage').dataset.v;document.querySelectorAll('.vt').forEach(b=>b.classList.toggle('on',b.dataset.view==v))}
+function flash(x){const f=$('#flash');f.textContent=x;f.style.display='block';clearTimeout(f._t);f._t=setTimeout(()=>f.style.display='none',5000)}
+function deliver(c,m){const ok=S.connected&&S.perm[c.id];
+ bridge(ok?`✓ ${c.name}: message delivered to SmartChat AI`:`✕ ${c.name}: not shared, so the AI never sees it`,ok);ingest(c,m)}
+
+/* ---------- SmartChat AI ---------- */
+function renderAI(){
+ const el=$('#abody'),nav=$('#anav');nav.style.display=S.connected?'flex':'none';nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.at==aTab));
+ const n=Object.values(S.perm).filter(Boolean).length;$('#asub').textContent=S.connected?`Reading ${n} of ${S.chats.length} chats`:'Not connected';
+ if(!S.connected){el.innerHTML=`<div class="hero"><div class="big">🔔</div><h2>Never miss an announcement</h2><p style="color:#475569">SmartChat AI turns deadlines buried in chats into tasks and keeps reminding you until they are done.</p><ul><li>You choose which chats it can read</li><li>ChatApp enforces that choice, and you can revoke it any time</li><li>Reminders repeat until you tap Finished</li></ul><button class="btn" data-consent="1">Connect ChatApp</button></div>`;return}
+ let h='';const T=S.tasks,n0=now(),cnt=f=>T.filter(f).length;
+ if(aTab=='tasks'){
+  h=`<div class="tiles"><div class="tile" style="background:var(--blue)"><b>${cnt(t=>t.status=='pending')}</b><small>Pending</small></div><div class="tile" style="background:var(--orange)"><b>${cnt(t=>t.status=='pending'&&t.at&&t.at-n0<2*D)}</b><small>Due soon</small></div><div class="tile" style="background:var(--green)"><b>${cnt(t=>t.status=='done')}</b><small>Done</small></div><div class="tile" style="background:var(--red)"><b>${cnt(t=>t.status=='overdue')}</b><small>Overdue</small></div></div>
+  <div class="qa"><input id="qa" placeholder="Add a task, e.g. Pay fees by Friday 5 PM"><button class="btn" id="qab">Add</button></div>`;
+  h+=S.confirm.map(f=>f.kind=='task'?`<div class="cf-card"><b>❓ Confirm: ${esc(f.a.title)}</b><br><small>${esc(f.note)} “${esc(f.m.text)}”</small><input type="datetime-local" id="cf${f.id}" value="${f.at?new Date(f.at-new Date(f.at).getTimezoneOffset()*6e4).toISOString().slice(0,16):''}"><div style="display:flex;gap:6px"><button class="btn g" data-cok="${f.id}">Create task</button><button class="btn o" data-cno="${f.id}">Dismiss</button></div></div>`
+   :`<div class="cf-card"><b>❓ Which task changed?</b><br><small>${esc(f.note)} “${esc(f.text)}” → ${fd(f.at,f.h)}</small><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${f.cands.map(i=>`<button class="btn" data-cch="${f.id}|${i}">${esc((S.tasks.find(t=>t.id==i)||{}).title)}</button>`).join('')}<button class="btn o" data-cno="${f.id}">None</button></div></div>`).join('');
+  h+=`<div class="fl">${['all','pending','overdue','done'].map(f=>`<button data-f="${f}" class="${flt==f?'on':''}">${cap(f)}</button>`).join('')}</div>`;
+  h+=T.filter(t=>flt=='all'||t.status==flt).sort((a,b)=>(a.status=='done')-(b.status=='done')||(a.at||9e15)-(b.at||9e15)).map(taskCard).join('')||'<div class="empty">No tasks yet. New announcements in the chats you allow will appear here.</div>';
+ }else if(aTab=='access'){
+  h=`<div class="note"><b>Permissions live in ChatApp.</b> This app only receives messages from chats you allowed there. Change them in ChatApp → Settings → Connected apps.</div><div class="perm" data-own="1"><span>Also make reminders from my own messages</span><div class="tg ${S.own===false?'':'on'}"></div></div>`+
+  S.chats.map(c=>`<div class="row" style="cursor:default">${av(c.name,'sm')}<div class="n"><b>${esc(c.name)}</b></div><span class="pill ${S.perm[c.id]?'done':''}">${S.perm[c.id]?'Allowed':'Not shared'}</span></div>`).join('')+
+  `<div style="padding:12px"><button class="btn" data-consent="1" style="width:100%">Manage in ChatApp</button></div>`;
+ }else h=S.log.map(l=>`<div class="lg"><span>${l.ic}</span><div>${esc(l.tx)}<small>${fd(l.t)}</small></div></div>`).join('')||'<div class="empty">Nothing yet.</div>';
+ el.innerHTML=h;el.classList.toggle('pad',aTab!='perm')
+}
+function quick(){
+ const i=$('#qa'),text=i.value.trim();if(!text)return;i.value='';const m={text,from:'You (manual)',t:now()},a=analyze(text,m.t);
+ if(a.task&&a.at&&!a.amb&&a.at>now())mk('manual',m,a,a.at,a.hasTime);
+ else S.confirm.push({id:uid(),kind:'task',chat:'manual',m,a:a.task?a:{title:cap(text),cat:'Task',pri:'Medium',aud:'You',conf:.5,ex:0},at:a.at||null,note:'Please confirm the deadline.'});
+ save();render();tick()}
+/* ---------- alarm: full-screen ringing reminder with sound ---------- */
+let AC=null,alarmT=null,ringId=null;
+function actx(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume()}catch(e){}return AC}
+function beep(){const c=actx();if(c&&!S.mute)[0,.24,.48].forEach((d,i)=>{const o=c.createOscillator(),g=c.createGain(),s=c.currentTime+d;o.type='square';o.frequency.value=i==1?988:880;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.16,s+.02);g.gain.linearRampToValueAtTime(0,s+.18);o.connect(g);g.connect(c.destination);o.start(s);o.stop(s+.2)});
+ try{navigator.vibrate&&!S.mute&&navigator.vibrate([250,120,250])}catch(e){}}
+function renderAlarm(){
+ const el=$('#alarm'),L=S.notifs.filter(n=>n.kind=='reminder'||n.kind=='overdue'),x=L[0],t=x&&S.tasks.find(k=>k.id==x.tid);
+ if(!t){el.classList.remove('show');clearInterval(alarmT);alarmT=null;ringId=null;return}
+ const od=x.kind=='overdue',c=chat(t.chat);el.classList.add('show');
+ if(ringId!=x.id){ringId=x.id;clearInterval(alarmT);beep();alarmT=setInterval(beep,1600)}
+ el.innerHTML=`<div class="ac"><div class="bell ${od?'od':''}">⏰</div><div class="atime" id="atime">${ft(now())}</div><h2>SmartChat AI — ${od?'Task Overdue':'Task Reminder'}${L.length>1?` · +${L.length-1} more`:''}</h2><div class="atitle">${esc(t.title)}</div>
+ <dl class="ad"><dt>From</dt><dd>${esc(t.from)}</dd><dt>Chat</dt><dd>${esc(c.name)}</dd><dt>Deadline</dt><dd>${t.at?fd(t.at,t.hasTime):'Not set'}</dd><dt>Remaining</dt><dd id="arem">${t.at?rem(t.at-now()):'—'}</dd><dt>Priority</dt><dd>${t.pri}</dd></dl>
+ <div class="aq">“${esc(t.msg)}”</div><div class="abt"><button style="background:var(--green)" data-fin="${t.id}">Finished</button><button style="background:var(--blue)" data-wd="${t.id}">I'll do it</button></div>
+ <button class="amu" data-amute="1">${S.mute?'🔇 Sound off — turn on':'🔔 Sound on — mute'}</button>${!S.mute&&(!AC||AC.state!='running')?'<div class="ahint">Tap anywhere to enable alarm sound</div>':''}</div>`}
+setInterval(()=>{const x=S.notifs.find(n=>n.kind=='reminder'||n.kind=='overdue'),t=x&&S.tasks.find(k=>k.id==x.tid),a=$('#atime');if(a)a.textContent=ft(now());const r=$('#arem');if(r&&t&&t.at)r.textContent=rem(t.at-now())},1000);
+document.addEventListener('pointerdown',()=>actx(),{once:true});
+function render(){renderWA();renderAI();renderToasts();renderConsent();renderAlarm()}
+
+/* ---------- events ---------- */
+function sendMsg(){const i=$('#in'),text=i.value.trim();if(!text||!open)return;const c=chat(open),m={id:uid(),from:asWho,text,t:now()};c.msgs.push(m);i.value='';deliver(c,m);save();render();tick()}
+document.addEventListener('click',e=>{
+ const g=k=>{const x=e.target.closest(`[${k}]`);return x?x.getAttribute(k):null};let v;const id=e.target.id;
+ if(v=g('data-wt')){wTab=v;renderWA()}
+ else if(v=g('data-open')){open=v;renderConv()}
+ else if(g('data-back')){open=null;renderWA()}
+ else if(v=g('data-vc'))startCall(chat(open).name,v=='video');
+ else if(v=g('data-call')){const[w,k]=v.split('|');startCall(w,k=='video')}
+ else if(g('data-end'))endCall();else if(g('data-dec'))endCall(1);
+ else if(g('data-acc')){call.state='on';call.t0=Date.now();renderCall()}
+ else if(g('data-mute')){mute=!mute;renderCall()}else if(g('data-spk')){spk=!spk;renderCall()}
+ else if(v=g('data-sv'))openSV(v);else if(v=g('data-svn'))svStep(+v);else if(g('data-svx'))svClose();
+ else if(g('data-stc')){stc={bg:BG[0],text:''};renderSTC()}
+ else if(v=g('data-stbg')){stc.text=$('#stt').value;stc.bg=v;renderSTC()}
+ else if(g('data-stx')){stc=null;renderSTC()}
+ else if(g('data-stpost')){const t=$('#stt').value.trim();if(t){let me=S.status.find(s=>s.who=='You');me.items.push({text:t,bg:stc.bg,t:now()});log('🟢','You posted a status')}stc=null;renderSTC();save();renderWA()}
+ else if(g('data-consent')){consent={...S.perm};if(innerWidth<860||$('#stage').dataset.v=='ai')$('#stage').dataset.v=innerWidth<860?'wa':'both';syncView();renderConsent()}
+ else if(v=g('data-ct')){consent[v]=!consent[v];renderConsent()}
+ else if(g('data-cc')){consent=null;renderConsent()}else if(g('data-ca'))allow();
+ else if(g('data-disc')){S.connected=false;S.perm={};consent=null;log('🔌','SmartChat AI disconnected from ChatApp');bridge('🔗 SmartChat AI disconnected',0);save();render()}
+ else if(v=g('data-at')){aTab=v;renderAI()}else if(v=g('data-f')){flt=v;renderAI()}
+ else if(g('data-own')){S.own=S.own===false;log('⚙️','Reminders from your own messages: '+(S.own?'on':'off'));save();renderAI()}
+ else if(g('data-amute')){S.mute=!S.mute;save();renderAlarm()}
+ else if(v=g('data-fin'))finish(v);else if(v=g('data-wd'))willDo(v);
+ else if(v=g('data-re')){const t=S.tasks.find(x=>x.id==v);t.status=t.at&&t.at<now()?'overdue':'pending';sched(t);log('↩️',`Reopened “${t.title}”`);save();render()}
+ else if(v=g('data-del')){S.tasks=S.tasks.filter(x=>x.id!=v);S.notifs=S.notifs.filter(x=>x.tid!=v);log('🗑️','Task deleted, reminders cancelled');save();render()}
+ else if(v=g('data-ok')){S.notifs=S.notifs.filter(x=>x.id!=v);save();render()}
+ else if(v=g('data-cok')){const f=S.confirm.find(x=>x.id==v),val=$('#cf'+v).value,at=val?+new Date(val):null;S.confirm=S.confirm.filter(x=>x!=f);mk(f.chat,f.m,f.a,at,at?(f.a.hasTime||new Date(at).getHours()+new Date(at).getMinutes()>0):false);save();render()}
+ else if(v=g('data-cno')){S.confirm=S.confirm.filter(x=>x.id!=v);save();render()}
+ else if(v=g('data-cch')){const[i,t]=v.split('|'),f=S.confirm.find(x=>x.id==i);applyChange(S.tasks.find(x=>x.id==t),f.at,f.h,f.text);S.confirm=S.confirm.filter(x=>x!=f);save();render()}
+ else if(v=g('data-t')){S.off=v=='0'?0:S.off+ +v*H;log('⏩','Demo clock → '+fd(now()));tick();save();render()}
+ else if(v=g('data-view')){const s=$('#stage');s.dataset.v=(innerWidth>=860&&s.dataset.v==v)?'both':v;syncView()}
+ else if(id=='tst'){actx();const el=e.target,L=S.tasks.filter(x=>x.status!='done'),R=L.flatMap(x=>x.rem.filter(r=>!r.done).map(r=>r.at)).sort((a,b)=>a-b);
+  if(S.connected&&R.length){const d=R[0]-now();if(d>0)S.off+=d+1000;log('⏩','Jumped to the next alarm: '+fd(now()));tick();save();render()}
+  else if(S.connected&&L.length){const k=L[0];S.notifs=S.notifs.filter(x=>x.tid!=k.id);S.notifs.push({id:uid(),tid:k.id,kind:'reminder',when:now()});render()}
+  else{beep();el.textContent='Connect and allow a chat first';setTimeout(()=>el.textContent='🔔 Test alarm',2500)}}
+ else if(id=='sb')sendMsg();else if(id=='qab')quick();
+});
+document.addEventListener('keydown',e=>{if(e.key=='Enter'){if(e.target.id=='in')sendMsg();if(e.target.id=='qa')quick()}});
+document.addEventListener('change',e=>{if(e.target.id=='who')asWho=e.target.value});
+$('#wsearch').addEventListener('input',e=>{q=e.target.value;$('#wbody').innerHTML=chatList()});
+
+function seed(){
+ const n=Date.now(),M=(f,t,ago)=>({id:uid(),from:f,text:t,t:n-ago*6e4});
+ S={off:0,seq:1,snooze:10,quiet:[0,0],seen:{},tasks:[],confirm:[],notifs:[],log:[],connected:false,perm:{},chats:[],
+  status:[{who:'You',items:[]},{who:'Staff',items:[{text:'Exam hall allotment will be shared tonight.',bg:BG[0],t:n-120*6e4}]},{who:'Priya',items:[{text:'Library is open till 9 PM 📚',bg:BG[1],t:n-300*6e4},{text:'Coffee break anyone? ☕',bg:BG[3],t:n-200*6e4}]},{who:'Arun',items:[{text:'Hackathon this weekend!',bg:BG[2],t:n-600*6e4}]}],
+  calls:[{id:'c1',who:'Priya',dir:'miss',t:n-180*6e4,dur:0},{id:'c2',who:'Staff',dir:'in',t:n-300*6e4,dur:312},{id:'c3',who:'Arun',dir:'out',t:n-1560*6e4,dur:95}]};
+ S.chats=[
+  {id:'nlp',name:'NLP Group',type:'group',members:24,msgs:[M('Staff','Good morning everyone!',90),M('Staff','Students, submit your NLP project on 10 October 2026.',60),M('You','Okay, noted!',58)]},
+  {id:'java',name:'Java Group',type:'group',members:31,msgs:[M('Staff','Your Java assignment must be submitted by next Monday.',200),M('Arun','Ok sir',190)]},
+  {id:'py',name:'Python Group',type:'group',members:28,msgs:[M('Priya','Happy birthday! Have a great day.',300)]},
+  {id:'team',name:'Project Team',type:'group',members:6,msgs:[M('Arun','Happy birthday Priya! Have a great day.',20),M('Priya','Team, finish the report within the next five hours.',5)]},
+  {id:'staff',name:'Staff (direct)',type:'dm',msgs:[M('Staff','The exam starts tomorrow at 9 AM.',2000),M('You','Thank you!',1990)]}];
+ log('👋','Open SmartChat AI and tap Connect ChatApp to choose which chats it may read.');
+}
+try{S=JSON.parse(localStorage.getItem('chatapp-suite'))}catch(e){}
+if(!S||!S.chats)seed();
+$('#stage').dataset.v=innerWidth<860?'wa':'both';syncView();render();tick();setInterval(tick,1000);setInterval(()=>{const e=$('#ct');if(e&&call&&call.state=='on')e.textContent=dur(call)},1000);save();
+</script>
+</body>
+</html>
